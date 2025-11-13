@@ -1,30 +1,52 @@
-import React from 'react';
 import { useForm } from 'react-hook-form';
-import { useMutation } from '@tanstack/react-query';
-import client from '../api/client';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { z } from 'zod';
+import { toast } from 'sonner';
+import { useRegister } from '../hooks/useAuth';
+import { useAuth } from '../hooks/useAuth';
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Button } from '../components/ui/button';
 
-export default function Register() {
-  const { register, handleSubmit, formState: { errors } } = useForm();
-  const navigate = useNavigate();
+// Validation schema with Zod
+const registerSchema = z.object({
+  name: z.string().min(2, 'Tên phải có ít nhất 2 ký tự'),
+  email: z.string().email('Email không hợp lệ').min(1, 'Email bắt buộc'),
+  password: z.string().min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
+  confirmPassword: z.string().min(6, 'Xác nhận mật khẩu bắt buộc'),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Mật khẩu không trùng khớp",
+  path: ["confirmPassword"],
+});
 
-  const mutation = useMutation({
-    mutationFn: (data) => client.post('/user/register', data),
+export default function Register() {
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    resolver: zodResolver(registerSchema),
   });
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+  const registerMutation = useRegister();
+
+  // Redirect to home if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const onSubmit = async (data) => {
     try {
-      await mutation.mutateAsync(data);
-      alert('Đăng ký thành công! Bạn có thể đăng nhập.');
+      const { confirmPassword: _, ...registerData } = data;
+      await registerMutation.mutateAsync(registerData);
+      toast.success('Đăng ký thành công! Vui lòng đăng nhập');
       navigate('/login');
     } catch (err) {
-      const msg = err?.response?.data?.message || 'Có lỗi xảy ra';
-      alert('Đăng ký thất bại: ' + msg);
+      const msg = err?.response?.data?.message || 'Đăng ký thất bại';
+      toast.error(msg);
     }
   };
 
@@ -45,9 +67,17 @@ export default function Register() {
             <CardContent>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div>
+                  <Label className="mb-2 block">Tên</Label>
+                  <Input {...register('name')} placeholder="Nhập tên của bạn" />
+                  {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name.message}</p>}
+                </div>
+
+                <div>
                   <Label className="mb-2 block">Email</Label>
                   <Input
-                    {...register('email', { required: 'Email là bắt buộc', pattern: { value: /^\S+@\S+$/i, message: 'Email không đúng định dạng' } })}
+                    {...register('email')}
+                    type="email"
+                    placeholder="Nhập email của bạn"
                   />
                   {errors.email && <p className="text-red-600 text-sm mt-1">{errors.email.message}</p>}
                 </div>
@@ -56,18 +86,29 @@ export default function Register() {
                   <Label className="mb-2 block">Mật khẩu</Label>
                   <Input
                     type="password"
-                    {...register('password', { required: 'Mật khẩu là bắt buộc', minLength: { value: 6, message: 'Mật khẩu tối thiểu 6 ký tự' } })}
+                    {...register('password')}
+                    placeholder="Nhập mật khẩu"
                   />
                   {errors.password && <p className="text-red-600 text-sm mt-1">{errors.password.message}</p>}
                 </div>
 
                 <div>
-                  <Button type="submit" className="w-full" disabled={mutation.isLoading}>
-                    {mutation.isLoading ? 'Đang đăng ký...' : 'Đăng ký'}
+                  <Label className="mb-2 block">Xác nhận mật khẩu</Label>
+                  <Input
+                    type="password"
+                    {...register('confirmPassword')}
+                    placeholder="Xác nhận mật khẩu"
+                  />
+                  {errors.confirmPassword && <p className="text-red-600 text-sm mt-1">{errors.confirmPassword.message}</p>}
+                </div>
+
+                <div>
+                  <Button type="submit" className="w-full" disabled={registerMutation.isPending}>
+                    {registerMutation.isPending ? 'Đang đăng ký...' : 'Đăng ký'}
                   </Button>
                 </div>
 
-                {mutation.isError && <p className="text-red-600 mt-3">{mutation.error?.response?.data?.message || 'Lỗi'}</p>}
+                {registerMutation.isError && <p className="text-red-600 mt-3">{registerMutation.error?.response?.data?.message || 'Lỗi'}</p>}
               </form>
             </CardContent>
             <CardFooter>
