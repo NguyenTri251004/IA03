@@ -1,6 +1,6 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom'; // ✅ thêm Link ở đây
 import { useMutation } from '@tanstack/react-query';
 import client from '../api/client';
 
@@ -36,7 +36,10 @@ export default function Login() {
           {/* Left panel - illustration / marketing copy (desktop-first) */}
           <div className="hidden md:flex flex-col justify-center px-8">
             <h1 className="text-4xl font-extrabold mb-4">Chào mừng trở lại</h1>
-            <p className="text-lg text-muted-foreground">Đăng nhập để tiếp tục sử dụng các tính năng nâng cao của ứng dụng. Trải nghiệm tốt nhất trên máy tính để bàn.</p>
+            <p className="text-lg text-muted-foreground">
+              Đăng nhập để tiếp tục sử dụng các tính năng nâng cao của ứng dụng. 
+              Trải nghiệm tốt nhất trên máy tính để bàn.
+            </p>
           </div>
 
           {/* Right panel - form card */}
@@ -67,7 +70,12 @@ export default function Login() {
               </form>
             </CardContent>
             <CardFooter>
-              <div className="w-full text-center text-sm text-muted-foreground">Chưa có tài khoản? <a href="/register" className="text-primary underline">Đăng ký</a></div>
+              <div className="w-full text-center text-sm text-muted-foreground">
+                Chưa có tài khoản?{" "}
+                <Link to="/register" className="text-primary underline">
+                  Đăng ký
+                </Link>
+              </div>
             </CardFooter>
           </Card>
         </div>
