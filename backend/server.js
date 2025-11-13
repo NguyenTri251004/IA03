@@ -15,7 +15,10 @@ app.use(express.json());
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 app.use(cors({
   origin: FRONTEND_URL,
-  optionsSuccessStatus: 200
+  credentials: true,
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use('/user', userRoutes);
