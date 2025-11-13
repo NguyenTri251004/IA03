@@ -3,33 +3,16 @@ import { createRoot } from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter } from 'react-router-dom'
 import App from './App'
-import { AuthProvider } from './context/AuthContext'
-import { Toaster } from 'sonner'
 import './index.css'
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      refetchOnWindowFocus: false,
-    },
-  },
-})
+const queryClient = new QueryClient()
 
-// Create root element
-const root = createRoot(document.getElementById('root'))
-
-// Render with providers
-root.render(
+createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <AuthProvider>
-          <App />
-          <Toaster position="top-right" richColors />
-        </AuthProvider>
+        <App />
       </BrowserRouter>
     </QueryClientProvider>
   </React.StrictMode>
 )
-

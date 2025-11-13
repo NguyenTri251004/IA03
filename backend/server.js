@@ -15,21 +15,19 @@ app.use(express.json());
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 app.use(cors({
   origin: FRONTEND_URL,
-  credentials: true,
   optionsSuccessStatus: 200
 }));
 
-// Routes
-app.use('/auth', userRoutes);
+app.use('/user', userRoutes);
 
-// Health check
+// Health
 app.get('/', (req, res) => res.send('API is running'));
 
 // Start
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 5000;
 
 // Prefer MONGO_URI from env, fallback to local MongoDB for development
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/ia04';
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/ia03';
 
 if (!process.env.MONGO_URI) {
   console.warn('Warning: MONGO_URI not set in environment, falling back to local MongoDB at', MONGO_URI);

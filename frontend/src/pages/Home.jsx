@@ -1,85 +1,36 @@
-import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
-import { useAuth, useUser, useLogout } from '../hooks/useAuth';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
-import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
 
 export default function Home() {
-  const navigate = useNavigate();
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
-  const { data: user, isLoading: userLoading } = useUser();
-  const logoutMutation = useLogout();
-
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      navigate('/login', { replace: true });
-    }
-  }, [isAuthenticated, authLoading, navigate]);
-
-  const handleLogout = async () => {
-    try {
-      await logoutMutation.mutateAsync();
-      toast.success('Đã đăng xuất');
-      navigate('/login', { replace: true });
-    } catch {
-      toast.error('Lỗi khi đăng xuất');
-    }
-  };
-
-  if (authLoading || userLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Đang tải...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return null;
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
-      <div className="max-w-2xl mx-auto">
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Xin chào, {user?.name || user?.email}!</CardTitle>
-            <CardDescription>Bạn đã đăng nhập thành công vào hệ thống</CardDescription>
-          </CardHeader>
-        </Card>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
+      <div className="w-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center w-full">
+          <div className="px-6 md:px-12">
+            <h1 className="text-5xl font-extrabold mb-4">IA03 — Demo đăng ký & đăng nhập</h1>
+            <p className="text-lg text-muted-foreground">Ứng dụng minh họa việc tạo tài khoản, xác thực bằng mật khẩu mã hóa và lưu trữ người dùng trong MongoDB. Thiết kế tối ưu cho desktop nhưng vẫn hiển thị tốt trên điện thoại.</p>
+          </div>
 
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="text-lg">Thông tin tài khoản</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600">Email</p>
-              <p className="text-lg font-semibold">{user?.email}</p>
-            </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600">Tên</p>
-              <p className="text-lg font-semibold">{user?.name}</p>
-            </div>
-            {user?.createdAt && (
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-600">Tạo tài khoản vào</p>
-                <p className="text-lg font-semibold">{new Date(user.createdAt).toLocaleString('vi-VN')}</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <div className="flex gap-4">
-          <Button onClick={handleLogout} disabled={logoutMutation.isPending} className="w-full">
-            {logoutMutation.isPending ? 'Đang đăng xuất...' : 'Đăng xuất'}
-          </Button>
+          <div className="px-6">
+            <Card className="w-full">
+              <CardHeader>
+                <CardTitle>Bắt đầu</CardTitle>
+                <CardDescription>Đăng ký để tạo tài khoản mới hoặc đăng nhập nếu bạn đã có tài khoản.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col gap-4 items-center">
+                  <Link to="/register">
+                    <Button className="w-44">Đăng ký</Button>
+                  </Link>
+                  <Link to="/login">
+                    <Button className="w-44">Đăng nhập</Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>

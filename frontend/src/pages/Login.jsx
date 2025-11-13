@@ -1,46 +1,31 @@
+import React from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
-import { z } from 'zod';
-import { toast } from 'sonner';
-import { useLogin } from '../hooks/useAuth';
-import { useAuth } from '../hooks/useAuth';
+import { useMutation } from '@tanstack/react-query';
+import client from '../api/client';
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Button } from '../components/ui/button';
 
-// Validation schema with Zod
-const loginSchema = z.object({
-  email: z.string().email('Email không hợp lệ').min(1, 'Email bắt buộc'),
-  password: z.string().min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
-});
-
 export default function Login() {
-  const { register, handleSubmit, formState: { errors } } = useForm({
-    resolver: zodResolver(loginSchema),
-  });
+  const { register, handleSubmit, formState: { errors } } = useForm();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
-  const loginMutation = useLogin();
 
-  // Redirect to home if already authenticated
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/', { replace: true });
-    }
-  }, [isAuthenticated, navigate]);
+  const mutation = useMutation({
+    mutationFn: (data) => client.post('/user/login', data),
+  });
 
   const onSubmit = async (data) => {
     try {
-      await loginMutation.mutateAsync(data);
-      toast.success('Đăng nhập thành công!');
+      const res = await mutation.mutateAsync(data);
+      // success
+      alert(res?.data?.message || 'Đăng nhập thành công');
       navigate('/');
     } catch (err) {
       const msg = err?.response?.data?.message || 'Đăng nhập thất bại';
-      toast.error(msg);
+      alert(msg);
     }
   };
 
@@ -75,8 +60,8 @@ export default function Login() {
                 </div>
 
                 <div>
-                  <Button type="submit" className="w-full" disabled={loginMutation.isPending}>
-                    {loginMutation.isPending ? 'Đang đăng nhập...' : 'Đăng nhập'}
+                  <Button type="submit" className="w-full" disabled={mutation.isLoading}>
+                    {mutation.isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
                   </Button>
                 </div>
               </form>
